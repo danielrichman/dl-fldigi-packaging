@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+source ./temporary
+
+cd $PREFIX
+source ./download
+
+cd $PREFIX
+source ./compile

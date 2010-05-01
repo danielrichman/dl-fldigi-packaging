@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#DL_FLDIGI="http://github.com/jamescoxon/dl-fldigi/tarball/master"
+DL_FLDIGI="http://github.com/danielrichman/dl-fldigi/tarball/master"
+PTW32="http://mirrors.kernel.org/sources.redhat.com/pthreads-win32/pthreads-w32-2-8-0-release.tar.gz"
+ZLIB="http://zlib.net/zlib-1.2.5.tar.gz"
+LIBPNG="http://downloads.sourceforge.net/project/libpng/01-libpng-master/1.4.2-devel/1.4.2rc03/libpng-1.4.2rc03.tar.gz"
+FLTK="http://ftp.funet.fi/pub/mirrors/ftp.easysw.com/pub/fltk/1.1.10/fltk-1.1.10-source.tar.gz"
+SAMPLERATE="http://www.mega-nerd.com/SRC/libsamplerate-0.1.7.tar.gz"
+SNDFILE="http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.21.tar.gz"
+HAMLIB="http://downloads.sourceforge.net/hamlib/hamlib-1.2.10.tar.gz"
+BINUTILS="http://ftp.gnu.org/gnu/binutils/binutils-2.20.tar.gz"
+CURL="http://curl.haxx.se/download/curl-7.20.1.tar.gz"
+
+XMLRPCC="http://xmlrpc-c.svn.sourceforge.net/svnroot/xmlrpc-c/stable -r1914"
+XMLRPC_PATCH="https://fedorahosted.org/fldigi/attachment/wiki/misc/Attachments/mingw-xmlrpc-c.patch?format=raw"
+
+FLTK_PATCH="https://fedorahosted.org/fldigi/attachment/wiki/misc/Attachments/mingw-fltk.patch?format=raw"
+
+PORTAUDIO="https://www.portaudio.com/repos/portaudio/trunk -r1495"
+
+WINE_DSOUND="http://wine.git.sourceforge.net/git/gitweb.cgi?p=wine/wine;a=blob_plain;f=include/dsound.h;h=b59405319e25058b8ec771f7f048452f4a89f3ce;hb=HEAD"
+WINE_DSOUND_PATCH="https://fedorahosted.org/fldigi/attachment/wiki/misc/Attachments/mingw-dsound.patch?format=raw"
+
