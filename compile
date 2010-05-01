@@ -38,7 +38,7 @@ cd $SRC/portaudio
 ./configure --prefix=$PREFIX/portaudio $CONFLAGS --with-winapi=wmme,directx --with-dxdir=$PREFIX/directx
 make && make install
 cd $PREFIX/lib/pkgconfig
-ln -s $PREFIX/portaudio/lib/pkgconfig/* .
+ln -s $PREFIX/src/portaudio/portaudio-2.0.pc .
 
 cd $SRC/samplerate
 ./configure --prefix=$PREFIX/samplerate $CONFLAGS --disable-fftw --disable-sndfile
