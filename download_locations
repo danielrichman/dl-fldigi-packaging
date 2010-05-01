@@ -19,6 +19,3 @@ FLTK_PATCH="https://fedorahosted.org/fldigi/attachment/wiki/misc/Attachments/min
 
 PORTAUDIO="https://www.portaudio.com/repos/portaudio/trunk -r1495"
 
-WINE_DSOUND="http://wine.git.sourceforge.net/git/gitweb.cgi?p=wine/wine;a=blob_plain;f=include/dsound.h;h=b59405319e25058b8ec771f7f048452f4a89f3ce;hb=HEAD"
-WINE_DSOUND_PATCH="https://fedorahosted.org/fldigi/attachment/wiki/misc/Attachments/mingw-dsound.patch?format=raw"
-
