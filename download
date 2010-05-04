@@ -61,12 +61,6 @@ svn export $PORTAUDIO portaudio
 cd $SRC/fltk		&& wget -O - -q $FLTK_PATCH		| patch -p1
 cd $SRC/xmlrpc		&& wget -O - -q $XMLRPC_PATCH		| patch -p1
 
-mkdir $PREFIX/directx
-mkdir $PREFIX/directx/include
-cd $PREFIX/directx/include
-wget -O dsound.h -q "$WINE_DSOUND"
-wget -O - -q $WINE_DSOUND_PATCH | patch -p1
-
 cd $SRC/hamlib
 sed -i "s/#include <unistd\.h>/\/* #include <unistd.h> *\//" src/{serial.c,event.c,iofunc.c}
 
