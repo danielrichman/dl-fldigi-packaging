@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export PATH=$PREFIX:$PATH
+cd $PREFIX
+source ./env
+bash
+rm $PREFIX

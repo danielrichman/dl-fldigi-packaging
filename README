@@ -1,9 +1,5 @@
-The scripts will create a temporary directory using mktemp, inside /tmp,
-download all the stuff and compile it. Despite placing a symlink to this
-folder in the working directory, they will not delete this folder
-afterwards; it typically has a name like /tmp/dl-fldigi.XXXXXX and you
-should rm -Rf it.
+The scripts will create a temporary directory using mktemp, download all 
+the stuff and compile it.
 
 On my box this builds a binary successfully and places it in
 $PREFIX/bin.
-I have no clue if this binary actually runs/works on a win32 box.

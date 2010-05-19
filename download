@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+if [ ! $# -eq 0 ]; then
+	echo "Usage: $0"
+	exit
+fi
+
 TINSTALL=""
 
 if [ ! -x /usr/bin/i586-mingw32msvc-gcc ]; then
@@ -9,6 +14,10 @@ fi
 
 if [ ! -x /usr/bin/makensis ]; then
 	TINSTALL="$TINSTALL nsis"
+fi
+
+if [ ! -x /usr/bin/git ]; then
+	TINSTALL="$TINSTALL git-core"
 fi
 
 if [ "x$TINSTALL" != "x" ]; then
@@ -26,7 +35,7 @@ cd $PREFIX
 source ./env
 source ./download_locations
 
-if [ -a $PREFIX/downloaded ]; then
+if [ -e $PREFIX/downloaded ]; then
 	echo "Already downloaded"
 	exit
 fi
@@ -44,7 +53,6 @@ chmod +x $PREFIX/bin/$HTGT-pkg-config
 
 cd $SRC
 
-mkdir dl-fldigi		&& wget -O - -q "$DL_FLDIGI"	| tar -xvzC dl-fldigi	--strip-components=1
 mkdir ptw32		&& wget	-O - -q "$PTW32"	| tar -xvzC ptw32	--strip-components=1
 mkdir zlib		&& wget -O - -q "$ZLIB"		| tar -xvzC zlib	--strip-components=1
 mkdir libpng		&& wget -O - -q "$LIBPNG"	| tar -xvzC libpng	--strip-components=1
@@ -63,5 +71,14 @@ cd $SRC/xmlrpc		&& wget -O - -q $XMLRPC_PATCH		| patch -p1
 
 cd $SRC/hamlib
 sed -i "s/#include <unistd\.h>/\/* #include <unistd.h> *\//" src/{serial.c,event.c,iofunc.c}
+
+cd $SRC
+sed -i "s/\/bin\/pwd/pwd/" curl/Makefile.am curl/Makefile.in xmlrpc/common.mk
+
+cd $SRC/xmlrpc
+find -type f -print0 | xargs -0 sed -i -r -e 's/\$\(CURDIR\)/\$\(SRCDIR\)/'
+sed -i -r -e 's/ifeq \(\$\(SRCDIR\)x,x\)/ifeq \(asdf,x\)/' common.mk 
+
+cd $SRC && git clone git://github.com/jamescoxon/dl-fldigi.git dl-fldigi
 
 touch $PREFIX/downloaded

@@ -1,7 +1,10 @@
 #!/bin/bash
 set -e
 
-source ./temporary
-export PATH=$PREFIX:$PATH
-cd $PREFIX
-exec bash
+if [ ! $# -eq 0 ]; then
+	echo "Usage: $0 <prefix dir>"
+	exit
+fi
+
+source ./create
+source ./drop-to-bash

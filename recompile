@@ -14,8 +14,16 @@ fi
 cd $PREFIX
 source ./env
 
-cd $PREFIX
-source ./compile-deps
+cd $SRC/dl-fldigi
+git clean -fxd
+git pull origin master
+
+rm -f $PREFIX/compiled-dl-fldigi
+
+if [ ! -e $PREFIX/compiled-deps ]; then
+	cd $PREFIX
+	source ./compile-deps
+fi
 
 cd $PREFIX
 source ./compile-dl-fldigi

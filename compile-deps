@@ -1,0 +1,90 @@
+#!/bin/bash
+set -e
+
+if [ ! -e $PREFIX/downloaded ]; then
+	echo "Sources have not been downloaded"
+	exit
+fi
+
+if [ -e $PREFIX/compiled-deps ]; then
+        echo "Dependencies have already been compiled"
+        exit
+fi
+
+cd $SRC/ptw32
+make CROSS=$HTGT- clean GC-inlined
+mkdir -p $PREFIX/ptw32{,/include,/lib}
+cp pthread.h sched.h semaphore.h $PREFIX/ptw32/include
+cp libpthreadGC2.a pthreadGC2.dll $PREFIX/ptw32/lib
+
+cd $SRC/zlib
+CC=$HTGT-gcc AR=$HTGT-ar RANLIB=$HTGT-ranlib ./configure --prefix=$PREFIX/zlib
+make LDSHAREDLIBC= 
+make install
+mkdir -p $PREFIX/zlib{,/include,/lib}
+cp zconf.h zlib.h $PREFIX/zlib/include
+cp libz.a $PREFIX/zlib/lib
+
+cd $SRC/libpng
+./configure --prefix=$PREFIX/png $CONFLAGS CPPFLAGS="-I$PREFIX/zlib/include" LDFLAGS="-L$PREFIX/zlib/lib" PKG_CONFIG=$PREFIX/bin/$HTGT-pkg-config
+make 
+make install
+cd $PREFIX/lib/pkgconfig
+ln -s $PREFIX/png/lib/pkgconfig/* .
+
+cd $SRC/fltk
+autoconf
+./configure --prefix=$PREFIX/fltk $CONFLAGS --enable-threads
+make 
+make install
+ln -s $PREFIX/fltk/bin/fltk-config $PREFIX/bin
+
+cd $SRC/portaudio
+./configure --prefix=$PREFIX/portaudio $CONFLAGS --with-winapi=wmme
+make
+make install
+cd $PREFIX/lib/pkgconfig
+ln -s $PREFIX/src/portaudio/portaudio-2.0.pc .
+
+cd $SRC/samplerate
+./configure --prefix=$PREFIX/samplerate $CONFLAGS --disable-fftw --disable-sndfile
+make
+make install
+cd $PREFIX/lib/pkgconfig
+ln -s $PREFIX/samplerate/lib/pkgconfig/* .
+
+cd $SRC/sndfile
+./configure --prefix=$PREFIX/sndfile $CONFLAGS PKG_CONFIG=$PREFIX/bin/$HTGT-pkg-config
+make
+rm tests/*dll
+make install
+cd $PREFIX/lib/pkgconfig
+ln -s $PREFIX/sndfile/lib/pkgconfig/* .
+
+cd $SRC/xmlrpc
+./configure CC=$HTGT-gcc --prefix=$PREFIX/xmlrpc $CONFLAGS --disable-wininet-client --disable-curl-client --disable-libwww-client
+make AR=$HTGT-ar RANLIB=$HTGT-ranlib BUILDTOOL_CC=gcc BUILDTOOL_CCLD=gcc CFLAGS_PERSONAL=-U_UNIX
+make AR=$HTGT-ar RANLIB=$HTGT-ranlib install
+ln -s $PREFIX/xmlrpc/bin/xmlrpc-c-config $PREFIX/bin
+
+cd $SRC/hamlib
+./configure --prefix=$PREFIX/hamlib $CONFLAGS --without-rigmatrix --without-rpc-backends --without-winradio --without-gnuradio --without-usrp --without-cxx-binding --without-perl-binding --without-tcl-binding --without-python-binding
+sed -i "s/tests//" Makefile
+make
+make install
+cd $PREFIX/lib/pkgconfig
+ln -s $PREFIX/hamlib/lib/pkgconfig/* .
+
+cd $SRC/binutils/bfd
+./configure --prefix=$PREFIX/bfd $CONFLAGS --disable-nls
+make
+make install
+
+cd $SRC/curl
+./configure --prefix=$PREFIX/curl PKG_CONFIG=$PREFIX/bin/$HTGT-pkg-config $CONFLAGS --with-zlib=$PREFIX/zlib/
+make
+make install
+cd $PREFIX/lib/pkgconfig
+ln -s $PREFIX/curl/lib/pkgconfig/* .
+
+touch $PREFIX/compiled-deps

@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+LOCAL_PREFIX=`mktemp -d ./dl-fldigi.XXXXXX`
+cp compile compile-deps compile-dl-fldigi download download_locations drop-to-bash env recompile $LOCAL_PREFIX
+chmod +x $LOCAL_PREFIX/{compile,download,recompile}
+mkdir $LOCAL_PREFIX/{bin,src,lib,lib/pkgconfig}
+
+echo "Created $LOCAL_PREFIX"
+
+source ./setup $LOCAL_PREFIX

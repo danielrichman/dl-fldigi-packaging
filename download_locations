@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#DL_FLDIGI="http://github.com/jamescoxon/dl-fldigi/tarball/master"
-DL_FLDIGI="http://github.com/danielrichman/dl-fldigi/tarball/master"
+DL_FLDIGI="git://github.com/jamescoxon/dl-fldigi.git"
+
 PTW32="http://mirrors.kernel.org/sources.redhat.com/pthreads-win32/pthreads-w32-2-8-0-release.tar.gz"
 ZLIB="http://zlib.net/zlib-1.2.5.tar.gz"
-LIBPNG="http://downloads.sourceforge.net/project/libpng/01-libpng-master/1.4.2-devel/1.4.2rc03/libpng-1.4.2rc03.tar.gz"
+LIBPNG="http://downloads.sourceforge.net/project/libpng/01-libpng-master/1.4.2-devel/libpng-1.4.2rc03.tar.gz"
 FLTK="http://ftp.funet.fi/pub/mirrors/ftp.easysw.com/pub/fltk/1.1.10/fltk-1.1.10-source.tar.gz"
 SAMPLERATE="http://www.mega-nerd.com/SRC/libsamplerate-0.1.7.tar.gz"
 SNDFILE="http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.21.tar.gz"

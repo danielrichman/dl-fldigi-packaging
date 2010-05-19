@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+if [ ! $# -eq 1 ]; then
+	echo "Usage: $0 <prefix dir>"
+	exit
+fi
+
+IFS_O=$IFS
+IFS=$(echo -en '\0')
+source ./setup $1
+IFS=$IFS_O
+
+source ./drop-to-bash
