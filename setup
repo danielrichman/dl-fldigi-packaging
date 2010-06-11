@@ -8,7 +8,7 @@ cd $1
 LOCAL_PREFIX=`pwd`
 
 PREFIX=/tmp/`basename $LOCAL_PREFIX`
-ln -s $LOCAL_PREFIX $PREFIX
+ln -fs $LOCAL_PREFIX $PREFIX
 
 echo "Location is $LOCAL_PREFIX"
 echo "Safe name is $PREFIX"
