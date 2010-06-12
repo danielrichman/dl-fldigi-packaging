@@ -79,6 +79,6 @@ cd $SRC/xmlrpc
 find -type f -print0 | xargs -0 sed -i -r -e 's/\$\(CURDIR\)/\$\(SRCDIR\)/'
 sed -i -r -e 's/ifeq \(\$\(SRCDIR\)x,x\)/ifeq \(asdf,x\)/' common.mk 
 
-cd $SRC && git clone git://github.com/jamescoxon/dl-fldigi.git dl-fldigi
+cd $SRC && git clone $DL_FLDIGI dl-fldigi
 
 touch $PREFIX/downloaded
