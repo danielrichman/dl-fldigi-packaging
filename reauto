@@ -11,4 +11,4 @@ IFS=$(echo -en '\0')
 source ./setup $1
 IFS=$IFS_O
 
-source ./recompile
+exec ./recompile
