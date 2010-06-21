@@ -13,7 +13,7 @@ fi
 
 cd $SRC/dl-fldigi
 autoreconf -vfi
-./configure $CONFLAGS --disable-nls --with-ptw32=$PREFIX/ptw32 PKG_CONFIG=$PREFIX/bin/$HTGT-pkg-config FLTK_CONFIG=$PREFIX/bin/fltk-config XMLRPC_C_CONFIG=$PREFIX/bin/xmlrpc-c-config CURL_CFLAGS="`$PREFIX/bin/$HTGT-pkg-config libcurl --static --cflags`" CURL_LIBS="`$PREFIX/bin/$HTGT-pkg-config libcurl --static --libs` -L$PREFIX/zlib/lib"
+./configure $CONFLAGS --disable-nls --with-ptw32=$PREFIX/ptw32 PKG_CONFIG=$PREFIX/bin/$HTGT-pkg-config FLTK_CONFIG=$PREFIX/bin/fltk-config XMLRPC_C_CONFIG=$PREFIX/bin/xmlrpc-c-config CURL_CFLAGS="`$PREFIX/bin/$HTGT-pkg-config libcurl --static --cflags`" CURL_LIBS="`$PREFIX/bin/$HTGT-pkg-config libcurl --static --libs` -L$PREFIX/zlib/lib" --disable-flarq
 make -j$MAKE_CORES
 make hamlib-static
 make nsisinst
