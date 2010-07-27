@@ -9,4 +9,4 @@ if [ $MAKE_CORES -lt 1 ]; then
 	MAKE_CORES=1
 fi
 
-export SRC HTGT CONFLAGS
+export SRC HTGT CONFLAGS MAKE_CORES
