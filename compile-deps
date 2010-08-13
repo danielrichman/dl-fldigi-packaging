@@ -56,7 +56,7 @@ ln -s $PREFIX/samplerate/lib/pkgconfig/* .
 cd $SRC/sndfile
 ./configure --prefix=$PREFIX/sndfile $CONFLAGS PKG_CONFIG=$PREFIX/bin/$HTGT-pkg-config
 make
-rm tests/*dll
+rm -f tests/*dll
 make install
 cd $PREFIX/lib/pkgconfig
 ln -s $PREFIX/sndfile/lib/pkgconfig/* .
