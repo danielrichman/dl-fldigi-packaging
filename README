@@ -1,5 +1,0 @@
-The scripts will create a temporary directory using mktemp, download all 
-the stuff and compile it.
-
-On my box this builds a binary successfully and places it in
-$PREFIX/bin.
