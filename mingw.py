@@ -151,8 +151,8 @@ class Builder:
         self.location = os.path.realpath(self.options["directory"])
         logger.debug("Build directory is " + self.location)
 
-        if not re.match(r"^[a-zA-Z0-9/]+$", self.location):
-            raise Exception("Some build scripts don't like non a-zA-Z0-9 in "
+        if not re.match(r"^[a-zA-Z0-9_/]+$", self.location):
+            raise Exception("Some build scripts don't like non a-zA-Z0-9_ in "
                             "the path to the build directory; sorry :-(")
 
         new_state = False
@@ -215,6 +215,7 @@ class Builder:
         self.write_state()
         fcntl.flock(self.state_file, fcntl.LOCK_UN)
         self.state_file.close()
+        self.null.close()
         if self.options["clean_temp_error_exit"]:
             self.clean_temp()
 

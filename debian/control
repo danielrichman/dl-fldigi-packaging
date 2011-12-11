@@ -1,0 +1,21 @@
+Source: dl-fldigi
+Section: hamradio
+Priority: optional
+Maintainer: Simrun Basuita <simrunbasuita@gmail.com>
+Build-Depends: debhelper (>= 7), libfltk1.1-dev, libhamlib-dev, libjpeg62-dev, libxft-dev, libpng-dev, zlib1g-dev, libexpat-dev, portaudio19-dev, libsndfile-dev, libsamplerate-dev, libcurl4-openssl-dev | libcurl4-gnutls-dev, libpulse-dev, libxmlrpc-c3-dev, cdbs, quilt, libssl-dev, libjsoncpp-dev, libpulse-dev
+Standards-Version: 3.9.1
+Homepage: http://github.com/jamescoxon/dl-fldigi
+
+Package: dl-fldigi
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: extra-xdg-menus
+Description: digital modem program for hamradio operators with UKHAS mods
+ fldigi is a modem program which supports most of the digital modes used 
+ by hamradio operators today. You can also use the program for 
+ calibrating your sound card to WWV or doing a frequency measurment test. 
+ The program also comes with a CW decoder. fldigi is written with the 
+ help of the Fast Light Toolkit X GUI.
+ .
+ This version contains modifications by the UKHAS, and serves as a client for
+ the distributed balloon tracking system.

@@ -1,0 +1,5 @@
+dl-fldigi ({version}) {distro}; urgency=low
+
+  * Automatic build of git commit {commit}
+
+ -- dl-fldigi build bot <builder@kraken.habhub.org>  {date}

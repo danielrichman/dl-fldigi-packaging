@@ -1,0 +1,43 @@
+The fldigi package was debianized by Joop Stakenborg <pa3aba@debian.org> on
+Fri,  2 Mar 2007 19:16:52 +0100. It was modified by Simrun Basuita
+<simrunbasuita@googlemail.com> on Sat, 23 May 2009 12:30:32 +0100 to create the
+dl-fldigi package.
+
+The original source was downloaded from http://www.w1hkj.com/Fldigi.html
+The UKHAS version was downloaded from http://github.com/jamescoxon/dl-fldigi/downloads
+
+Upstream Author: Dave Freese <w1hkj@w1hkj.com>
+Copyright: Copyright W1HKJ, Dave Freese 2006
+
+Modifications: UKHAS (http://www.ukhas.org.uk/)
+
+License, from src/main.cxx:
+
+//
+// Digital Modem Program for the Fast Light Toolkit
+//
+// Copyright W1HKJ, Dave Freese 2006
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Library General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Library General Public License for more details.
+//
+// You should have received a copy of the GNU Library General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+//
+// Please report all bugs and problems to "w1hkj@w1hkj.com".
+//
+
+fldigi is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
+
+The Debian packaging is (C) 2007, Joop Stakenborg <pa3aba@debian.org> and
+is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
+Modifications to the packaging are Copyright 2009-2010 Simrun Basuita
+<simrunbasuita@gmail.com> and are also licensed under the GPL.
