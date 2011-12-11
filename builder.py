@@ -700,10 +700,8 @@ class Builder:
         self.make("hamlib-static", env=env)
         self.make("nsisinst")
 
-        search = glob.glob(self.loc("temp", "src", "dl-fldigi-*_setup.exe"))
-        import pdb
-        pdb.set_trace()
-        assert len(search) == 1
+        search = glob.glob(self.loc("temp", "src", "src",
+                                    "dl-fldigi-*_setup.exe"))
         installer = search[0]
 
         shutil.copy(installer, self.options["output"])
