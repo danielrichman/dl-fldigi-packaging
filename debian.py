@@ -103,8 +103,10 @@ class Builder:
         logger.debug("Executing: " + repr(args) + " " + repr(kwargs))
 
         if not self.options["verbose"]:
-            kwargs["stdout"] = self.null
-            kwargs["stderr"] = self.null
+            if "stdout" not in kwargs:
+                kwargs["stdout"] = self.null
+            if "stderr" not in kwargs:
+                kwargs["stderr"] = self.null
 
         if "cwd" not in kwargs:
             kwargs["cwd"] = self.location
