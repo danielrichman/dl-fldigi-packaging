@@ -705,7 +705,7 @@ class Builder:
         installer = search[0]
 
         shutil.copy(installer, self.options["output"])
-        logger.info("Saved binary " + os.basename(installer) + " to " +
+        logger.info("Saved binary " + os.path.basename(installer) + " to " +
                     self.options["output"])
 
 if __name__ == "__main__":
