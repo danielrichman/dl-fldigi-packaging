@@ -67,10 +67,10 @@ class Builder:
         parser = optparse.OptionParser(usage="%prog git-source [git-commit]")
         parser.add_option("-d", "--prefix", dest="directory",
                 help="build and install dependencies to this directory",
-                metavar="DIR", default="build")
+                metavar="DIR", default="w32_build")
         parser.add_option("-c", "--cache", dest="cache",
                 help="find and save source tarballs in this directory",
-                metavar="DIR", default="cache")
+                metavar="DIR", default="w32_cache")
         parser.add_option("-a", "--remake-all", dest="remake_all",
                 help="remake everything", action="store_true")
         parser.add_option("-q", "--quiet", dest="quiet",
