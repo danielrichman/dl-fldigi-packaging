@@ -28,7 +28,7 @@ class Builder:
             logging.getLogger().setLevel(level=logging.WARNING)
 
         try:
-            self.null = open("/dev/null")
+            self.null = open("/dev/null", "w")
             self.setup_build_dir()
         except:
             logger.exception("Error in setup")
