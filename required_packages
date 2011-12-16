@@ -10,3 +10,5 @@ debian build:
 
 windows build:
   gcc-mingw32
+
+jsoncpp-dev from https://launchpad.net/~danieljonathanrichman/+archive/ppa
