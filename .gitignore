@@ -1,4 +1,4 @@
-build/
-cache/
+w32_build/
+w32_cache/
 dl-fldigi-*_setup.exe
 dl-fldigi_*.deb
