@@ -2,3 +2,6 @@ w32_build/
 w32_cache/
 dl-fldigi-*_setup.exe
 dl-fldigi_*.deb
+dl-fldigi_*.dsc
+dl-fldigi_*.orig.tar.gz
+dl-fldigi_*.debian.tar.gz

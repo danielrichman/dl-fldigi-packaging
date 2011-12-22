@@ -40,7 +40,7 @@ class Builder:
             self.get_orig_tar()
             self.add_debian_dir()
             self.build()
-            self.get_deb()
+            self.get_files()
         except:
             delay_error = True
             logger.exception("Error in build")
@@ -64,6 +64,8 @@ class Builder:
                 help="enable DEBUG info", action="store_true")
         parser.add_option("-o", "--output", dest="output",
                 help="save the dl-fldigi deb here", default=".")
+        parser.add_option("-s", "--source", dest="get_src", default=False,
+                help="get the source debian files only", action="store_true")
         parser.add_option("-j", "--make-jobs", dest="make_jobs",
                 help="pass -j to make for speedy builds")
 
@@ -198,20 +200,34 @@ class Builder:
             f.write(changelog)
 
     def build(self):
-        jobs = []
+        args = []
         if self.options["make_jobs"]:
-            jobs.append("-j" + self.options["make_jobs"])
+            args.append("-j" + self.options["make_jobs"])
 
-        self.cmd("debuild", "-uc", "-us", *jobs, cwd=self.loc(self.debsrc))
+        if self.options["get_src"]:
+            args.append("-S")
 
-    def get_deb(self):
-        name = "dl-fldigi_" + self.version + "." + self.git + "_*.deb"
-        search = glob.glob(self.loc(name))
-        assert len(search) == 1
-        deb = search[0]
+        self.cmd("debuild", "-uc", "-us", *args, cwd=self.loc(self.debsrc))
 
-        logger.info("Copying output deb " + os.path.basename(deb))
-        shutil.copy(deb, self.options["output"])
+    def get_files(self):
+        prefix = "dl-fldigi_" + self.version + "." + self.git
+
+        if self.options["get_src"]:
+            files = [prefix + ".orig.tar.gz", prefix + ".debian.tar.gz",
+                     prefix + ".dsc"]
+            assert files[0] == self.origname
+
+            for fn in files:
+                shutil.copy(self.loc(fn), self.options["output"])
+        else:
+            name = prefix + "_*.deb"
+            search = glob.glob(self.loc(name))
+            assert len(search) == 1
+            deb = search[0]
+
+            logger.info("Copying output deb " + os.path.basename(deb))
+            shutil.copy(deb, self.options["output"])
+
 
 if __name__ == "__main__":
     Builder().main()
