@@ -218,6 +218,7 @@ class Builder:
             assert files[0] == self.origname
 
             for fn in files:
+                logger.info("Copying " + fn)
                 shutil.copy(self.loc(fn), self.options["output"])
         else:
             name = prefix + "_*.deb"
