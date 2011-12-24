@@ -232,7 +232,6 @@ class Builder:
         self.item("xmlrpc", "1.16.38")
         self.item("libtool", "2.4.2")
         self.item("hamlib", "1.2.14")
-        self.item("bfd", "2.22")
         self.item("openssl", "1.0.0e")
         self.item("curl", "7.23.1")
         self.item("mingw_fakepath", "1")
@@ -593,18 +592,6 @@ class Builder:
         self.make("install")
 
         self.copy_pkgconfig("hamlib", "hamlib.pc")
-
-    def bfd(self):
-        self.download_source("http://ftp.gnu.org/gnu/binutils/"
-                "binutils-2.22.tar.gz", "binutils.tar.gz",
-                "8b3ad7090e3989810943aa19103fdb83")
-        self.extract_source_tar("binutils.tar.gz")
-
-        d = self.loc("temp", "src", "bfd")
-        self.configure("--prefix=" + self.loc("items", "bfd"),
-                "--disable-nls", *STD_CONFIGURE, cwd=d)
-        self.make(cwd=d)
-        self.make("install", cwd=d)
 
     def openssl(self):
         self.download_source("http://www.openssl.org/source/"
