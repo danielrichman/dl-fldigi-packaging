@@ -671,7 +671,7 @@ class Builder:
         env["PKG_CONFIG_LIBDIR"] = self.loc("pkgconfig")
 
         self.configure("--disable-nls", "--disable-flarq",
-                   "--without-pulseaudio", "--enable-optimizations=sse2",
+                   "--without-pulseaudio",
                    "--with-ptw32=" + self.loc("items", "pthreadsw32"),
                    "FLTK_CONFIG=" + self.loc("items", "fltk", "bin",
                                              "fltk-config"),
