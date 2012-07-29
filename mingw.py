@@ -40,6 +40,7 @@ class Builder:
             self.check_packages()
             self.open_build_dir()
             self.open_cache_dir()
+            self.find_extra_dir()
         except:
             logger.exception("Error whilst setting up")
             sys.exit(1)
@@ -106,7 +107,8 @@ class Builder:
             self.find_path("lsb_release")
         except:
             logger.warning("Unable to determine linux distro.")
-            logger.warning("This script was built on and for Ubuntu lucid")
+            logger.warning("This script has been tested on Ubuntu lucid "
+                           "and Debian squeeze")
             return
 
         (r, w) = os.pipe()
@@ -120,10 +122,10 @@ class Builder:
 
         logger.debug("LSB release: " + line)
 
-        if "Ubuntu" not in line:
-            logger.warning("This script was built on and for Ubuntu lucid")
-        if "10.04" not in line:
-            logger.warning("Only tested on Ubuntu lucid!")
+        if not ("Ubuntu" in line and "10.04" in line) and \
+           not ("Debian" in line and "squeeze" in line):
+            logger.warning("This script has been tested on Ubuntu lucid "
+                           "and Debian squeeze only!")
 
     def find_path(self, name):
         for d in os.environ["PATH"].split(":"):
@@ -151,8 +153,8 @@ class Builder:
         self.location = os.path.realpath(self.options["directory"])
         logger.debug("Build directory is " + self.location)
 
-        if not re.match(r"^[a-zA-Z0-9_/]+$", self.location):
-            raise Exception("Some build scripts don't like non a-zA-Z0-9_ in "
+        if not re.match(r"^[a-zA-Z0-9_\-/]+$", self.location):
+            raise Exception("Some build scripts don't like non a-zA-Z0-9_- in "
                             "the path to the build directory; sorry :-(")
 
         new_state = False
@@ -184,11 +186,21 @@ class Builder:
                 raise Exception("build directory has moved: this will break"
                                 "everything!")
 
+    def find_extra_dir(self):
+        self.extra = os.path.realpath("w32_extra")
+        try:
+            os.stat(self.extra)
+        except OSError as e:
+            raise Exception("Couldn't find directory: w32_extra")
+
     def loc(self, *args):
         return os.path.join(self.location, *args)
 
     def cloc(self, *args):
         return os.path.join(self.cache, *args)
+
+    def eloc(self, *args):
+        return os.path.join(self.extra, *args)
 
     def clean_temp(self):
         self.clean_dir("temp")
@@ -221,7 +233,7 @@ class Builder:
 
     def build_all(self):
         self.item("pthreadsw32", "2.8.0")
-        self.item("zlib", "1.2.5")
+        self.item("zlib", "1.2.7")
         self.item("libpng", "1.5.6")
         self.item("libjpeg", "6b")
         self.item("fltk", "1.1.10")
@@ -268,6 +280,14 @@ class Builder:
         self.state[name] = version
         self.write_state()
 
+    def check_hash(self, f, expect):
+        if len(expect) == 32:
+            logger.warning("Please update the hash from MD5 to SHA512")
+            h = self.file_md5(f)
+        else:
+            h = self.file_sha512(f)
+        return h.lower() == expect.lower()
+
     def file_md5(self, f):
         f.seek(0)
 
@@ -278,7 +298,17 @@ class Builder:
             s = f.read(1024)
         return m.hexdigest()
 
-    def download_source(self, url, name, md5):
+    def file_sha512(self, f):
+        f.seek(0)
+
+        m = hashlib.sha512()
+        s = f.read(1024)
+        while len(s):
+            m.update(s)
+            s = f.read(1024)
+        return m.hexdigest()
+
+    def download_source(self, url, name, fhash):
         # This doesn't feel particularly pythonic.
 
         f = open(self.cloc(name), "a+")
@@ -290,8 +320,8 @@ class Builder:
             f.seek(0, os.SEEK_END)
             if not f.tell():
                 logger.info("Downloading " + name)
-            elif self.file_md5(f).lower() != md5.lower():
-                logger.info("MD5 for " + name + " is bad, redownloading")
+            elif not self.check_hash(f, fhash):
+                logger.info("Hash for " + name + " is bad, redownloading")
             else:
                 logger.debug("Using cached " + name)
                 return f
@@ -307,8 +337,8 @@ class Builder:
                 f.write(d)
                 d = s.read(1024)
 
-            if self.file_md5(f).lower() != md5.lower():
-                raise Exception("Downloaded file's MD5 is bad")
+            if not self.check_hash(f, fhash):
+                raise Exception("Downloaded file's hash is bad")
 
             fcntl.flock(f, fcntl.LOCK_SH)
             f.seek(0)
@@ -385,8 +415,9 @@ class Builder:
 
     def pthreadsw32(self):
         self.download_source("ftp://sourceware.org/pub/pthreads-win32/"
-                "pthreads-w32-2-8-0-release.tar.gz", "pthreadsw32.tar.gz",
-                "6d30c693233b1464ef8983fedd8ccb22")
+            "pthreads-w32-2-8-0-release.tar.gz", "pthreadsw32.tar.gz",
+            "d86040b18641b52f2de81468e06e2885d0f0ed47cc5c9c90ca33614ed53ddd60"
+            "167723b46eb477d905ad69f93b6b9002762589ba6c351f78a8041109cdbf287e")
         self.extract_source_tar("pthreadsw32.tar.gz")
         self.make("CROSS=" + MINGW_NAME + "-", "clean", "GC-inlined")
 
@@ -405,8 +436,10 @@ class Builder:
                    self.loc("items", "pthreadsw32", "lib", "libpthread.a"))
 
     def zlib(self):
-        self.download_source("http://zlib.net/zlib-1.2.5.tar.gz",
-                "zlib.tar.gz", "c735eab2d659a96e5a594c9e8541ad63")
+        self.download_source("http://zlib.net/zlib-1.2.7.tar.gz",
+            "zlib.tar.gz",
+            "b1c073ad26684e354f7c522c14655840592e03872bc0a94690f89cae2ff88f14"
+            "6fce1dad252ff27a889dac4a32ff9f8ab63ba940671f9da89e9ba3e19f1bf58d")
         self.extract_source_tar("zlib.tar.gz")
 
         env = os.environ.copy()
@@ -423,8 +456,9 @@ class Builder:
 
     def libpng(self):
         self.download_source("http://downloads.sourceforge.net/libpng/"
-                "libpng-1.5.6.tar.gz", "libpng.tar.gz",
-                "8b0c05ed12637ee1f060ddfbbf526ea3")
+            "libpng-1.5.6.tar.gz", "libpng.tar.gz",
+            "045d645d9e2756f4c73d3eaba7b6738e6ff8e3e7cbb9f19a42ff45c22e6ff08c"
+            "039a681e3295981e21b1e2fdbc9a915861a7f0ba55fc92506a0593b3f8176e68")
         self.extract_source_tar("libpng.tar.gz")
 
         self.configure("--prefix=" + self.loc("items", "libpng"),
@@ -440,8 +474,9 @@ class Builder:
 
     def libjpeg(self):
         self.download_source("http://downloads.sourceforge.net/libjpeg/"
-                "jpegsrc.v6b.tar.gz",
-                "libjpeg6b.tar.gz", "dbd5f3b47ed13132f04c685d608a7547")
+            "jpegsrc.v6b.tar.gz", "libjpeg6b.tar.gz",
+            "5d37d3695105fc345ca269ab98cd991472e5de72f702c9a8a652a7d114a40eb9"
+            "9670c69a87ecb24bf64e96318fc0ee2bcb44c497d9d3d2a67378c99e4eb348fe")
         self.extract_source_tar("libjpeg6b.tar.gz")
 
         self.configure("--prefix=" + self.loc("items", "libjpeg"),
@@ -456,13 +491,11 @@ class Builder:
 
     def fltk(self):
         self.download_source("http://ftp.easysw.com/pub/fltk/1.1.10/"
-                "fltk-1.1.10-source.tar.gz", "fltk.tar.gz",
-                "e6378a76ca1ef073bcb092df1ef3ba55")
-        self.download_source("https://fedorahosted.org/fldigi/attachment/"
-                "wiki/misc/Attachments/mingw-fltk.patch?format=raw",
-                "mingw-fltk.patch", "86e8d0925e7f5cf38369c61d22e5bb16")
+            "fltk-1.1.10-source.tar.gz", "fltk.tar.gz",
+            "82f06cb923bbc897903308069c6c25d5e2c6fbbeb7fd5fcb7889f5d7bfca476d"
+            "283164cb89ade5839a19b16f5ff8ab031e0c0b74c843cf2ec9dbf330150dab14")
         self.extract_source_tar("fltk.tar.gz")
-        with open(self.cloc("mingw-fltk.patch")) as p:
+        with open(self.eloc("mingw-fltk.patch")) as p:
             self.src_cmd("patch", "-p1", stdin=p)
 
         # FLTK requires libpng1.2.x (bundled). We can't use our libpng
@@ -480,17 +513,15 @@ class Builder:
         # fltk-config binary
 
     def directx_devel(self):
-        self.download_source("http://pastie.org/pastes/2997205/download"
-                "?key=cltlbg9tvcxsxhalgsr2g", "dsound.h",
-                "09f354b288f38377de19bf13eef17464")
         os.mkdir(self.loc("items", "directx_devel", "include"))
-        shutil.copy(self.cloc("dsound.h"),
+        shutil.copy(self.eloc("dsound.h"),
                     self.loc("items", "directx_devel", "include"))
 
     def portaudio(self):
         self.download_source("http://www.portaudio.com/archives/"
-                "pa_stable_v19_20111121.tgz", "portaudio.tar.gz",
-                "25c85c1cc5e9e657486cbc299c6c035a")
+            "pa_stable_v19_20111121.tgz", "portaudio.tar.gz",
+            "e9d039313ce27ae1f643ef2509ddea7ac6aadca5d39f2f2a4f0ccd8a3661a5a5"
+            "6a29e666300d3d4418cab6231ee14b3c09eb83dca0dd3326e1f24418d035abb2")
         self.extract_source_tar("portaudio.tar.gz")
 
         self.configure("--prefix=" + self.loc("items", "portaudio"),
@@ -504,8 +535,9 @@ class Builder:
 
     def samplerate(self):
         self.download_source("http://www.mega-nerd.com/SRC/"
-                "libsamplerate-0.1.8.tar.gz", "samplerate.tar.gz",
-                "1c7fb25191b4e6e3628d198a66a84f47")
+            "libsamplerate-0.1.8.tar.gz", "samplerate.tar.gz",
+            "85d93df24d9d62e7803a5d0ac5d268b2085214adcb160e32fac316b12ee8a0ce"
+            "36ccfb433a3c0a08f6e3ec418a5962bdb84f8a11262286a9b347436983029a7d")
         self.extract_source_tar("samplerate.tar.gz")
 
         self.configure("--prefix=" + self.loc("items", "samplerate"),
@@ -521,8 +553,9 @@ class Builder:
 
     def sndfile(self):
         self.download_source("http://www.mega-nerd.com/libsndfile/files/"
-                "libsndfile-1.0.25.tar.gz", "sndfile.tar.gz",
-                "e2b7bb637e01022c7d20f95f9c3990a2")
+            "libsndfile-1.0.25.tar.gz", "sndfile.tar.gz",
+            "4ca9780ed0a915aca8a10ef91bf4bf48b05ecb85285c2c3fe7eef1d46d3e0747"
+            "e61416b6bddbef369bd69adf4b796ff5f61380e0bc998906b170a93341ba6f78")
         self.extract_source_tar("sndfile.tar.gz")
 
         self.configure("--prefix=" + self.loc("items", "sndfile"),
@@ -537,13 +570,11 @@ class Builder:
 
     def xmlrpc(self):
         self.download_source("http://downloads.sourceforge.net/xmlrpc-c/"
-                "xmlrpc-c-1.16.38.tgz", "xmlrpc-c.tar.gz",
-                "fabb49e5f1efeffa1bedd15a9131699a")
-        self.download_source("http://pastie.org/pastes/2997461/download"
-                "?key=qhkoyjm9dzukxvo5qmyfg", "mingw-xmlrpc-c.patch",
-                "8ef010cc52a8c5c9dfb7cade55ac3ee7")
+            "xmlrpc-c-1.16.38.tgz", "xmlrpc-c.tar.gz",
+            "3125603aa6cd60c416942524647bd79b3493b64521f0a3cf7fc66983a941d1d9"
+            "b7f3ad7355d66128e85ecbb946d9ffa6c3626962a7ed484ef14e2c22045a3fa9")
         self.extract_source_tar("xmlrpc-c.tar.gz")
-        with open(self.cloc("mingw-xmlrpc-c.patch")) as p:
+        with open(self.eloc("mingw-xmlrpc-c.patch")) as p:
             self.src_cmd("patch", "-p1", stdin=p)
 
         self.src_cmd("autoconf")
@@ -562,8 +593,9 @@ class Builder:
 
     def libtool(self):
         self.download_source("http://ftpmirror.gnu.org/libtool/"
-                "libtool-2.4.2.tar.gz", "libtool.tar.gz",
-                "d2f3b7d4627e69e13514a40e72a24d50")
+            "libtool-2.4.2.tar.gz", "libtool.tar.gz",
+            "0e54af7bbec376f943f2b8e4f13631fe5627b099a37a5f0252e12bade76473b0"
+            "a36a673529d594778064cd8632abdc43d8a20883d66d6b27738861afbb7e211d")
         self.extract_source_tar("libtool.tar.gz")
 
         self.configure("--prefix=" + self.loc("items", "libtool"),
@@ -573,8 +605,9 @@ class Builder:
 
     def hamlib(self):
         self.download_source("http://downloads.sourceforge.net/hamlib/"
-                "hamlib-1.2.14.tar.gz", "hamlib.tar.gz",
-                "ccd5232d3285a31c29b5acce1c7a3a65")
+            "hamlib-1.2.14.tar.gz", "hamlib.tar.gz",
+            "a209048750e7e55a2386af436e01741ffab0338aa21db8d1a82eb0072a5161e2"
+            "9c722c5cc1ea5d021dac9a069f7c4fe3a41c73969a6d39cdee88f809c1ea4354")
         self.extract_source_tar("hamlib.tar.gz")
 
         self.configure("--prefix=" + self.loc("items", "hamlib"),
@@ -587,6 +620,8 @@ class Builder:
 
         # Ugh...
         self.src_cmd("sed", "-i", "s/ tests doc$/ doc/", "Makefile")
+        self.src_cmd("sed", "-i", "s/^int usleep/\/\//",
+                     "lib/win32termios.h") # int != long
         os.mkdir(self.loc("temp", "src", "libltdl"))
         self.make("DEFS=-DHAVE_SLEEP -DHAVE_CONFIG_H")
         self.make("install")
@@ -595,8 +630,9 @@ class Builder:
 
     def openssl(self):
         self.download_source("http://www.openssl.org/source/"
-                "openssl-1.0.0e.tar.gz", "openssl.tar.gz",
-                "7040b89c4c58c7a1016c0dfa6e821c86")
+            "openssl-1.0.0e.tar.gz", "openssl.tar.gz",
+            "131773f6b3efce96feca1d1eb86e06de07e426c93aad9abd42656eaea678644a"
+            "447a147a7d8738d8b9063d85ac97ccaea119c686197d176ea6609ae3408253e0")
         self.extract_source_tar("openssl.tar.gz")
 
         self.src_cmd("/bin/bash", "./Configure", "mingw",
@@ -615,7 +651,9 @@ class Builder:
 
     def curl(self):
         self.download_source("http://curl.haxx.se/download/curl-7.23.1.tar.gz",
-                "curl.tar.gz", "8e23151f569fb54afef093ac0695077d")
+            "curl.tar.gz", 
+            "401904cd187fa1460f373130b6f871da85a4de45776bd04cc5c8ca73af103607"
+            "42aa5b213f674d8aa51516007cf411baf6590c5835f9d69c360a6692c12581c8")
         self.extract_source_tar("curl.tar.gz")
 
         self.configure("--prefix=" + self.loc("items", "curl"),
@@ -641,8 +679,9 @@ class Builder:
 
     def libjsoncpp(self):
         self.download_source("http://downloads.sourceforge.net/jsoncpp/"
-                "jsoncpp-src-0.5.0.tar.gz", "jsoncpp.tar.gz",
-                "24482b67c1cb17aac1ed1814288a3a8f")
+            "jsoncpp-src-0.5.0.tar.gz", "jsoncpp.tar.gz",
+            "2815d3523f92c33a5be3221161a590a0fddd16cb22e5dc634791535ee44271ec"
+            "4fbb64f81cc958a87b1f029a8108ed9f169cda5a2d0422f60699ac286386a1bc")
         self.extract_source_tar("jsoncpp.tar.gz")
 
         env = os.environ.copy()
@@ -651,11 +690,18 @@ class Builder:
         self.src_cmd("scons", "platform=mingw", env=env)
 
         shutil.copytree(self.loc("temp", "src", "include", "json"),
-                        self.loc("items", "libjsoncpp", "include", "jsoncpp"))
+                        self.loc("items", "libjsoncpp", "include", "json"))
         os.mkdir(self.loc("items", "libjsoncpp", "lib"))
         shutil.copy(self.loc("temp", "src", "buildscons", "mingw", "src",
                              "lib_json", "libjson_mingw_libmt.a"),
                     self.loc("items", "libjsoncpp", "lib", "libjsoncpp.a"))
+
+        with open(self.eloc("jsoncpp.pc")) as source:
+            with open(self.loc("pkgconfig", "jsoncpp.pc"), "w") as dest:
+                for line in source:
+                    if line == "prefix=\n":
+                        line = "prefix={0}\n".format(self.loc("items", "libjsoncpp"))
+                    dest.write(line)
 
     def dl_fldigi(self):
         self.src_cmd("git", "clone", self.dl_fldigi_source,

@@ -1,0 +1,26 @@
+diff --git a/configure.in b/configure.in
+index c8f8b97..5d87e9f 100644
+--- a/configure.in
++++ b/configure.in
+@@ -55,6 +55,8 @@ if test "x$uname" = x; then
+     uname="CYGWIN"
+ fi
+ 
++uname=MINGW
++
+ dnl Don't automatically add "-g" to compiler options...
+ ARCHFLAGS="${ARCHFLAGS:=}"
+ CFLAGS="${CFLAGS:=}"
+diff --git a/test/Makefile b/test/Makefile
+index 8ef5784..1f66132 100644
+--- a/test/Makefile
++++ b/test/Makefile
+@@ -162,7 +162,7 @@ GLALL = \
+ 	glpuzzle$(EXEEXT) \
+ 	shape$(EXEEXT)
+ 
+-all:	$(ALL) $(GLDEMOS)
++all:#	$(ALL) $(GLDEMOS)
+ 
+ gldemos:	$(GLALL)
+ 

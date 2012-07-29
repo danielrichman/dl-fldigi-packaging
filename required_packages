@@ -1,15 +1,15 @@
-(Ubuntu 10.04 lucid)
+Tested on Ubuntu 10.04 lucid and Debian squeeze only.
 
-build-essential, python, git-core, autoconf
+build-essential python git-core autoconf scons
 
 debian build:
-  debhelper, libfltk1.1-dev, libhamlib-dev, libjpeg62-dev, libxft-dev,
-  libpng-dev, zlib1g-dev, libexpat-dev, portaudio19-dev, libsndfile-dev,
-  libsamplerate-dev, libcurl4-openssl-dev | libcurl4-gnutls-dev, libpulse-dev,
-  libxmlrpc-c3-dev, cdbs, quilt, libssl-dev, libjsoncpp-dev, libpulse-dev,
+  debhelper libfltk1.1-dev libhamlib-dev libjpeg62-dev libxft-dev
+  libpng-dev zlib1g-dev libexpat-dev portaudio19-dev libsndfile-dev
+  libsamplerate-dev libcurl4-openssl-dev | libcurl4-gnutls-dev libpulse-dev
+  libxmlrpc-c3-dev cdbs quilt libssl-dev libjsoncpp-dev libpulse-dev
   devscripts
 
 windows build:
-  gcc-mingw32
+  gcc-mingw32 nsis
 
 jsoncpp-dev from https://launchpad.net/~danieljonathanrichman/+archive/ppa

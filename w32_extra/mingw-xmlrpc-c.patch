@@ -1,0 +1,240 @@
+diff --git a/GNUmakefile b/GNUmakefile
+index 500f576..b2c2b55 100644
+--- a/GNUmakefile
++++ b/GNUmakefile
+@@ -92,6 +92,7 @@ shell_config: $(BLDDIR)/config.mk
+ 	@echo "# From '$@'"                                             >>$@
+ 	@echo '#######################################################' >>$@
+ 	@echo 'ENABLE_ABYSS_THREADS="$(ENABLE_ABYSS_THREADS)"'		>>$@
++	@echo 'THREADS_LIBS="$(THREAD_LIBS)"'				>>$@
+ 	@echo 'ENABLE_LIBXML2_BACKEND="$(ENABLE_LIBXML2_BACKEND)"'      >>$@
+ 	@echo 'MUST_BUILD_WININET_CLIENT="$(MUST_BUILD_WININET_CLIENT)"'>>$@
+ 	@echo 'MUST_BUILD_CURL_CLIENT="$(MUST_BUILD_CURL_CLIENT)"'	>>$@
+diff --git a/config.mk.in b/config.mk.in
+index 88d7c32..4cd35f6 100644
+--- a/config.mk.in
++++ b/config.mk.in
+@@ -51,8 +51,8 @@ CC = @CC@
+ CXX = @CXX@
+ CCLD = $(CC)
+ CXXLD = $(CXX)
+-AR = ar
+-RANLIB = ranlib
++AR = @AR@
++RANLIB = @RANLIB@
+ LN_S = ln -s
+ INSTALL = $(SRCDIR)/install-sh
+ 
+diff --git a/configure.in b/configure.in
+index 99e7758..56727fc 100644
+--- a/configure.in
++++ b/configure.in
+@@ -352,7 +352,14 @@ dnl =======================================================================
+ 
+ dnl Non-Unix systems will need to set up their platform configuration file
+ dnl by hand.
+-DIRECTORY_SEPARATOR="/"
++case "$host_os" in
++     *mingw*)
++        DIRECTORY_SEPARATOR="\\\\"
++        ;;
++     *)
++        DIRECTORY_SEPARATOR="/"
++        ;;
++esac
+ AC_SUBST(DIRECTORY_SEPARATOR)
+ 
+ 
+@@ -588,6 +595,8 @@ if test x"$enable_libwww_client" != xno; then
+         AC_MSG_RESULT(no)
+         HAVE_LIBWWW_SSL_DEFINE=0
+     fi
++else
++    HAVE_LIBWWW_SSL_DEFINE=0
+ fi
+ AC_SUBST(HAVE_LIBWWW_SSL_DEFINE)
+ 
+@@ -625,6 +634,10 @@ AC_SUBST(CPP_WARN_FLAGS)
+ BUILDDIR=`pwd`
+ AC_SUBST(BUILDDIR)
+ 
++AR=${ac_tool_prefix}ar
++AC_SUBST([AR])
++RANLIB=${ac_tool_prefix}ranlib
++AC_SUBST([RANLIB])
+ 
+ dnl =======================================================================
+ dnl Output our results.
+diff --git a/lib/abyss/src/Makefile b/lib/abyss/src/Makefile
+index cbb187e..10e4012 100644
+--- a/lib/abyss/src/Makefile
++++ b/lib/abyss/src/Makefile
+@@ -18,10 +18,16 @@ STATIC_LIBRARIES_TO_INSTALL = libxmlrpc_abyss.a
+ SHARED_LIBS_TO_BUILD := libxmlrpc_abyss
+ SHARED_LIBS_TO_INSTALL := libxmlrpc_abyss
+ 
+-ifeq ($(ENABLE_ABYSS_THREADS),yes)
+-  THREAD_MODULE = thread_pthread
++ifeq ($(findstring mingw,$(HOST_OS)),mingw)
++  THREAD_MODULE = thread_windows
++  SOCKET_MODULE = socket_win
+ else
+-  THREAD_MODULE = thread_fork
++  SOCKET_MODULE = socket_unix
++  ifeq ($(ENABLE_ABYSS_THREADS),yes)
++    THREAD_MODULE = thread_pthread
++  else
++    THREAD_MODULE = thread_fork
++  endif
+ endif
+ 
+ TARGET_MODS = \
+@@ -39,7 +45,7 @@ TARGET_MODS = \
+   server \
+   session \
+   socket \
+-  socket_unix \
++  $(SOCKET_MODULE) \
+   token \
+   $(THREAD_MODULE) \
+   trace \
+diff --git a/lib/abyss/src/file.c b/lib/abyss/src/file.c
+index 75926e0..0332549 100644
+--- a/lib/abyss/src/file.c
++++ b/lib/abyss/src/file.c
+@@ -49,7 +49,7 @@
+ 
+ #include <string.h>
+ 
+-#if MSVCRT
++#if MSVCRT || defined(__MINGW32__)
+   #include <io.h>
+   typedef __int64 readwriterc_t;
+ #else
+@@ -74,7 +74,7 @@ FALSE;
+ 
+ struct TFileFind {
+ #ifdef WIN32
+-  #if MSVCRT
++#if MSVCRT || defined(__MINGW32__)
+       intptr_t handle;
+   #else
+       HANDLE handle;
+@@ -277,7 +277,7 @@ fileFindFirstPosix(TFileFind *  const filefindP,
+                    TFileInfo *  const fileinfo,
+                    bool *       const retP) {
+     
+-#if !MSVCRT
++#if !MSVCRT && !defined(__MINGW32__)
+     strncpy(filefindP->path, path, NAME_MAX);
+     filefindP->path[NAME_MAX] = '\0';
+     filefindP->handle = opendir(path);
+@@ -323,7 +323,7 @@ fileFindNextWin(TFileFind * const filefindP ATTR_UNUSED,
+                 TFileInfo * const fileinfo  ATTR_UNUSED,
+                 bool *      const retvalP   ATTR_UNUSED) {
+ 
+-#if MSVCRT
++#if MSVCRT || defined(__MINGW32__)
+     *retvalP = _findnexti64(filefindP->handle, fileinfo) != -1;
+ #else
+ #ifdef WIN32
+@@ -401,7 +401,7 @@ FileFindNext(TFileFind * const filefindP,
+ void
+ FileFindClose(TFileFind * const filefindP) {
+ #ifdef WIN32
+-#if MSVCRT
++#if MSVCRT || defined(__MINGW32__)
+     _findclose(filefindP->handle);
+ #else
+    FindClose(filefindP->handle);
+diff --git a/src/cpp/Makefile b/src/cpp/Makefile
+index 2dbb47c..c9eb9bb 100644
+--- a/src/cpp/Makefile
++++ b/src/cpp/Makefile
+@@ -18,8 +18,7 @@ TARGET_LIB_NAMES_PP = \
+   lib$(LIBXMLRPCPP_NAME) \
+   libxmlrpc_server++ \
+   libxmlrpc_server_cgi++ \
+-  libxmlrpc_server_pstream++ \
+-  libxmlrpc_packetsocket \
++  libxmlrpc_server_pstream++
+ 
+ ifeq ($(ENABLE_ABYSS_SERVER),yes)
+   TARGET_LIB_NAMES_PP += libxmlrpc_server_abyss++
+@@ -73,8 +72,7 @@ TARGET_MODS_PP = \
+   $(LIBXMLRPC_SERVER_ABYSSPP_MODS) \
+   $(LIBXMLRPC_SERVER_CGIPP_MODS) \
+   $(LIBXMLRPC_SERVER_PSTREAMPP_MODS) \
+-  $(LIBXMLRPC_CLIENTPP_MODS) \
+-  $(LIBXMLRPC_PACKETSOCKET_MODS) \
++  $(LIBXMLRPC_CLIENTPP_MODS)
+ 
+ OMIT_CPP_LIB_RULES = Y
+ MAJ=4
+diff --git a/src/cpp/server_cgi.cpp b/src/cpp/server_cgi.cpp
+index 5b8e9ef..07c16fd 100644
+--- a/src/cpp/server_cgi.cpp
++++ b/src/cpp/server_cgi.cpp
+@@ -186,6 +186,7 @@ serverCgi::~serverCgi() {
+ 
+ 
+ #ifdef _WIN32
++#include <fcntl.h>
+ #define FILEVAR fileP
+ #else
+ #define FILEVAR
+diff --git a/xmlrpc-c-config.main b/xmlrpc-c-config.main
+index f1f5db5..5d319f6 100644
+--- a/xmlrpc-c-config.main
++++ b/xmlrpc-c-config.main
+@@ -89,7 +89,7 @@ while test $# -gt 0; do
+       ;;
+     abyss-server)
+       if test "${ENABLE_ABYSS_THREADS}" = "yes"; then
+-        the_libs="-lpthread $the_libs"
++        the_libs="$THREAD_LIBS $the_libs"
+         fi
+       the_libs="${LSOCKET} $the_libs"
+       the_libs="-lxmlrpc_abyss $the_libs"
+diff --git a/xmlrpc-c-config.test.main b/xmlrpc-c-config.test.main
+index 113accc..5ac924e 100644
+--- a/xmlrpc-c-config.test.main
++++ b/xmlrpc-c-config.test.main
+@@ -71,7 +71,7 @@ while test $# -gt 0; do
+       ;;
+     abyss-server)
+       if test "${ENABLE_ABYSS_THREADS}" = "yes"; then
+-        the_libs="-lpthread $the_libs"
++        the_libs="$THREAD_LIBS $the_libs"
+         fi
+       the_libs="${LSOCKET} $the_libs"
+       the_libs="${BLDDIR}/lib/abyss/src/libxmlrpc_abyss.a $the_libs"
+diff --git a/xmlrpc_config.h.in b/xmlrpc_config.h.in
+index b46173c..45fda6a 100644
+--- a/xmlrpc_config.h.in
++++ b/xmlrpc_config.h.in
+@@ -108,7 +108,7 @@
+   #define MSVCRT 0
+ #endif
+ 
+-#if MSVCRT
++#if MSVCRT || defined(__MINGW32__)
+   /* The MSVC runtime library _does_ have a 'struct timeval', but it is
+      part of the Winsock interface (along with select(), which is probably
+      its intended use), so isn't intended for use for general timekeeping.
+@@ -126,13 +126,13 @@
+ /* Note that the return value of XMLRPC_VSNPRINTF is int on Windows,
+    ssize_t on POSIX.
+ */
+-#if MSVCRT
++#if MSVCRT || defined(__MINGW32__)
+   #define XMLRPC_VSNPRINTF _vsnprintf
+ #else
+   #define XMLRPC_VSNPRINTF vsnprintf
+ #endif
+ 
+-#if MSVCRT
++#if MSVCRT || defined(__MINGW32__)
+   #define HAVE_REGEX 0
+ #else
+   #define HAVE_REGEX 1
