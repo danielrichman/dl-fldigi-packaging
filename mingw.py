@@ -559,7 +559,7 @@ class Builder:
         self.extract_source_tar("sndfile.tar.gz")
 
         self.configure("--prefix=" + self.loc("items", "sndfile"),
-                "--disable-external-libs", *STD_CONFIGURE)
+                "--disable-external-libs", "--disable-sqlite", *STD_CONFIGURE)
         self.make()
         self.make("install")
 
