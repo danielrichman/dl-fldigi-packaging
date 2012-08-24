@@ -1,26 +1,24 @@
-diff --git a/configure.in b/configure.in
-index c8f8b97..5d87e9f 100644
---- a/configure.in
-+++ b/configure.in
-@@ -55,6 +55,8 @@ if test "x$uname" = x; then
-     uname="CYGWIN"
- fi
+diff -ur a/FL/filename.H b/FL/filename.H
+--- a/FL/filename.H	2010-12-20 13:35:43.000000000 +0000
++++ b/FL/filename.H	2012-08-24 19:50:30.000000000 +0100
+@@ -79,7 +79,7 @@
+ #  endif /* __cplusplus */
  
-+uname=MINGW
-+
- dnl Don't automatically add "-g" to compiler options...
- ARCHFLAGS="${ARCHFLAGS:=}"
- CFLAGS="${CFLAGS:=}"
-diff --git a/test/Makefile b/test/Makefile
-index 8ef5784..1f66132 100644
---- a/test/Makefile
-+++ b/test/Makefile
-@@ -162,7 +162,7 @@ GLALL = \
- 	glpuzzle$(EXEEXT) \
- 	shape$(EXEEXT)
  
--all:	$(ALL) $(GLDEMOS)
-+all:#	$(ALL) $(GLDEMOS)
+-#  if defined(WIN32) && !defined(__CYGWIN__) && !defined(__WATCOMC__)
++#  if 0
  
- gldemos:	$(GLALL)
+ struct dirent {char d_name[1];};
  
+diff -ur a/Makefile b/Makefile
+--- a/Makefile	2011-02-15 15:29:03.000000000 +0000
++++ b/Makefile	2012-08-24 19:49:07.000000000 +0100
+@@ -27,7 +27,7 @@
+ 
+ include makeinclude
+ 
+-DIRS = $(IMAGEDIRS) src $(CAIRODIR) fluid test documentation
++DIRS = $(IMAGEDIRS) src $(CAIRODIR) # fluid test documentation
+ 
+ all: makeinclude fltk-config
+ 	for dir in $(DIRS); do\
