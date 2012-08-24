@@ -236,7 +236,7 @@ class Builder:
         self.item("zlib", "1.2.7")
         self.item("libpng", "1.5.6")
         self.item("libjpeg", "6b")
-        self.item("fltk", "1.1.10")
+        self.item("fltk", "1.3.0")
         self.item("directx_devel", "3")
         self.item("portaudio", "v19_20111121")
         self.item("samplerate", "0.1.8")
@@ -281,22 +281,8 @@ class Builder:
         self.write_state()
 
     def check_hash(self, f, expect):
-        if len(expect) == 32:
-            logger.warning("Please update the hash from MD5 to SHA512")
-            h = self.file_md5(f)
-        else:
-            h = self.file_sha512(f)
+        h = self.file_sha512(f)
         return h.lower() == expect.lower()
-
-    def file_md5(self, f):
-        f.seek(0)
-
-        m = hashlib.md5()
-        s = f.read(1024)
-        while len(s):
-            m.update(s)
-            s = f.read(1024)
-        return m.hexdigest()
 
     def file_sha512(self, f):
         f.seek(0)
@@ -490,25 +476,22 @@ class Builder:
         self.make("install-lib")
 
     def fltk(self):
-        self.download_source("http://ftp.easysw.com/pub/fltk/1.1.10/"
-            "fltk-1.1.10-source.tar.gz", "fltk.tar.gz",
-            "82f06cb923bbc897903308069c6c25d5e2c6fbbeb7fd5fcb7889f5d7bfca476d"
-            "283164cb89ade5839a19b16f5ff8ab031e0c0b74c843cf2ec9dbf330150dab14")
+        self.download_source("http://ftp.easysw.com/pub/fltk/1.3.0/"
+            "fltk-1.3.0-source.tar.gz", "fltk.tar.gz",
+            "a7adf9def90b143bc7ff54ac82fe9f6812b49209ab4145aada45210a3c314f9d"
+            "91ae413240a8c57492826eca011aa147c68a131a9fe20bf221e7bc70c6c908ee")
         self.extract_source_tar("fltk.tar.gz")
         with open(self.eloc("mingw-fltk.patch")) as p:
             self.src_cmd("patch", "-p1", stdin=p)
 
-        # FLTK requires libpng1.2.x (bundled). We can't use our libpng
-        # 'cause it doesn't work with the new API. This sucks. Omit "libpng"
-        # from flag_items.
         self.src_cmd("autoconf")
         self.configure("--prefix=" + self.loc("items", "fltk"),
                 "--enable-threads", *STD_CONFIGURE,
-                flag_items=["libjpeg", "zlib", "pthreadsw32"])
-        self.make()
-        self.make("install")
-
-        shutil.rmtree(self.loc("items", "fltk", "share"))
+                flag_items=["libpng", "libjpeg", "zlib", "pthreadsw32"])
+        # DIRS=src switches off building in documentation, test, fluid
+        # directories.
+        self.make("DIRS=src")
+        self.make("DIRS=src", "install")
 
         # fltk-config binary
 
