@@ -247,7 +247,6 @@ class Builder:
         self.item("openssl", "1.0.0e")
         self.item("curl", "7.23.1")
         self.item("mingw_fakepath", "1")
-        self.item("libjsoncpp", "0.5.0")
         self.item("dl_fldigi", None)
 
     def item(self, name, version):
@@ -660,32 +659,6 @@ class Builder:
             os.symlink(self.find_path(target_name),
                        self.loc("items", "mingw_fakepath", n))
 
-    def libjsoncpp(self):
-        self.download_source("http://downloads.sourceforge.net/jsoncpp/"
-            "jsoncpp-src-0.5.0.tar.gz", "jsoncpp.tar.gz",
-            "2815d3523f92c33a5be3221161a590a0fddd16cb22e5dc634791535ee44271ec"
-            "4fbb64f81cc958a87b1f029a8108ed9f169cda5a2d0422f60699ac286386a1bc")
-        self.extract_source_tar("jsoncpp.tar.gz")
-
-        env = os.environ.copy()
-        env["PATH"] = self.loc("items", "mingw_fakepath") + ":" + env["PATH"]
-
-        self.src_cmd("scons", "platform=mingw", env=env)
-
-        shutil.copytree(self.loc("temp", "src", "include", "json"),
-                        self.loc("items", "libjsoncpp", "include", "json"))
-        os.mkdir(self.loc("items", "libjsoncpp", "lib"))
-        shutil.copy(self.loc("temp", "src", "buildscons", "mingw", "src",
-                             "lib_json", "libjson_mingw_libmt.a"),
-                    self.loc("items", "libjsoncpp", "lib", "libjsoncpp.a"))
-
-        with open(self.eloc("jsoncpp.pc")) as source:
-            with open(self.loc("pkgconfig", "jsoncpp.pc"), "w") as dest:
-                for line in source:
-                    if line == "prefix=\n":
-                        line = "prefix={0}\n".format(self.loc("items", "libjsoncpp"))
-                    dest.write(line)
-
     def dl_fldigi(self):
         self.src_cmd("git", "clone", self.dl_fldigi_source,
                      self.loc("temp", "src"), cwd=None)
@@ -708,8 +681,7 @@ class Builder:
                                                  "xmlrpc-c-config"),
                    "X_CFLAGS=-DXMD_H", # Inhibit libjpeg crud
                    "LIBS=-lltdl",
-                   flag_items=["libjsoncpp", "libjpeg", "zlib", "openssl",
-                               "libtool"],
+                   flag_items=["libjpeg", "zlib", "openssl", "libtool"],
                    env=env,
                    *STD_CONFIGURE)
         self.make()

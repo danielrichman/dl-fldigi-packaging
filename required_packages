@@ -6,10 +6,7 @@ debian build:
   debhelper libfltk1.1-dev libhamlib-dev libjpeg62-dev libxft-dev
   libpng-dev zlib1g-dev libexpat-dev portaudio19-dev libsndfile-dev
   libsamplerate-dev libcurl4-openssl-dev | libcurl4-gnutls-dev libpulse-dev
-  libxmlrpc-c3-dev cdbs quilt libssl-dev libjsoncpp-dev libpulse-dev
-  devscripts
+  libxmlrpc-c3-dev cdbs quilt libssl-dev libpulse-dev devscripts
 
 windows build:
   gcc-mingw32 nsis
-
-jsoncpp-dev from https://launchpad.net/~danieljonathanrichman/+archive/ppa

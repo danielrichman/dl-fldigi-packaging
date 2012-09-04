@@ -2,7 +2,7 @@ Source: dl-fldigi
 Section: hamradio
 Priority: optional
 Maintainer: Simrun Basuita <simrunbasuita@gmail.com>
-Build-Depends: debhelper (>= 7), libfltk1.1-dev, libhamlib-dev, libjpeg62-dev, libxft-dev, libpng-dev, zlib1g-dev, libexpat-dev, portaudio19-dev, libsndfile-dev, libsamplerate-dev, libcurl4-openssl-dev | libcurl4-gnutls-dev, libpulse-dev, libxmlrpc-c3-dev, cdbs, quilt, libssl-dev, libjsoncpp-dev, libpulse-dev
+Build-Depends: debhelper (>= 7), libfltk1.1-dev, libhamlib-dev, libjpeg62-dev, libxft-dev, libpng-dev, zlib1g-dev, libexpat-dev, portaudio19-dev, libsndfile-dev, libsamplerate-dev, libcurl4-openssl-dev | libcurl4-gnutls-dev, libpulse-dev, libxmlrpc-c3-dev, cdbs, quilt, libssl-dev, libpulse-dev
 Standards-Version: 3.9.1
 Homepage: http://github.com/jamescoxon/dl-fldigi
 
