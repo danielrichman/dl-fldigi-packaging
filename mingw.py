@@ -234,18 +234,18 @@ class Builder:
     def build_all(self):
         self.item("pthreadsw32", "2.8.0")
         self.item("zlib", "1.2.7")
-        self.item("libpng", "1.5.6")
+        self.item("libpng", "1.5.12")
         self.item("libjpeg", "6b")
         self.item("fltk", "1.3.0")
         self.item("directx_devel", "3")
         self.item("portaudio", "v19_20111121")
         self.item("samplerate", "0.1.8")
         self.item("sndfile", "1.0.25")
-        self.item("xmlrpc", "1.16.38")
+        self.item("xmlrpc", "1.16.42")
         self.item("libtool", "2.4.2")
         self.item("hamlib", "1.2.14")
-        self.item("openssl", "1.0.0e")
-        self.item("curl", "7.23.1")
+        self.item("openssl", "1.0.1c")
+        self.item("curl", "7.27.0")
         self.item("mingw_fakepath", "1")
         self.item("dl_fldigi", None)
 
@@ -441,9 +441,9 @@ class Builder:
 
     def libpng(self):
         self.download_source("http://downloads.sourceforge.net/libpng/"
-            "libpng-1.5.6.tar.gz", "libpng.tar.gz",
-            "045d645d9e2756f4c73d3eaba7b6738e6ff8e3e7cbb9f19a42ff45c22e6ff08c"
-            "039a681e3295981e21b1e2fdbc9a915861a7f0ba55fc92506a0593b3f8176e68")
+            "libpng-1.5.12.tar.gz", "libpng.tar.gz",
+            "dbefad00fa34f4f21dca0f1e92e95bd55f1f4478fa0095dcf015b4d06f0c823f"
+            "f11755cd777e507efaf1c9098b74af18f613ec9000e5c3a5cc1c7554fb5aefb8")
         self.extract_source_tar("libpng.tar.gz")
 
         self.configure("--prefix=" + self.loc("items", "libpng"),
@@ -552,9 +552,9 @@ class Builder:
 
     def xmlrpc(self):
         self.download_source("http://downloads.sourceforge.net/xmlrpc-c/"
-            "xmlrpc-c-1.16.38.tgz", "xmlrpc-c.tar.gz",
-            "3125603aa6cd60c416942524647bd79b3493b64521f0a3cf7fc66983a941d1d9"
-            "b7f3ad7355d66128e85ecbb946d9ffa6c3626962a7ed484ef14e2c22045a3fa9")
+            "xmlrpc-c-1.16.42.tgz", "xmlrpc-c.tar.gz",
+            "e7307631e6d2915eba7811570b8cb236994b82221458657347acf8703d9bf3c1"
+            "5e9d46c15a90c3cce0af81237286d9efbe5ee471881e1fc2a2a952beb1fdafb0")
         self.extract_source_tar("xmlrpc-c.tar.gz")
         with open(self.eloc("mingw-xmlrpc-c.patch")) as p:
             self.src_cmd("patch", "-p1", stdin=p)
@@ -612,9 +612,9 @@ class Builder:
 
     def openssl(self):
         self.download_source("http://www.openssl.org/source/"
-            "openssl-1.0.0e.tar.gz", "openssl.tar.gz",
-            "131773f6b3efce96feca1d1eb86e06de07e426c93aad9abd42656eaea678644a"
-            "447a147a7d8738d8b9063d85ac97ccaea119c686197d176ea6609ae3408253e0")
+            "openssl-1.0.1c.tar.gz", "openssl.tar.gz",
+            "14f766daab0828a2f07c65d6da8469a4a5a2b839ff3da188538c4e2db3e3e2f3"
+            "7217fb37e269617fb438463b75fb77dab0b155f36831ff48edbc9e7f2903ebd3")
         self.extract_source_tar("openssl.tar.gz")
 
         self.src_cmd("/bin/bash", "./Configure", "mingw",
@@ -632,10 +632,10 @@ class Builder:
         self.copy_pkgconfig("openssl", "libcrypto.pc")
 
     def curl(self):
-        self.download_source("http://curl.haxx.se/download/curl-7.23.1.tar.gz",
-            "curl.tar.gz", 
-            "401904cd187fa1460f373130b6f871da85a4de45776bd04cc5c8ca73af103607"
-            "42aa5b213f674d8aa51516007cf411baf6590c5835f9d69c360a6692c12581c8")
+        self.download_source("http://curl.haxx.se/download/curl-7.27.0.tar.gz",
+            "curl.tar.gz",
+            "d701631e897464d92582a77f13e8aed17f10ee1d284007af3c1435a6c2263c90"
+            "b4ba0334b9b41b20e34518d5d5be7cf0fd7c1ef0092bc592bd137577f5faf213")
         self.extract_source_tar("curl.tar.gz")
 
         self.configure("--prefix=" + self.loc("items", "curl"),
