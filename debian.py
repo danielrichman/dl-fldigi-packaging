@@ -84,8 +84,8 @@ class Builder:
         self.location = os.path.realpath(self.options["directory"])
         logger.debug("Build directory is " + self.location)
 
-        if not re.match(r"^[a-zA-Z0-9_/]+$", self.location):
-            raise Exception("Some build scripts don't like non a-zA-Z0-9_ in "
+        if not re.match(r"^[a-zA-Z0-9_\-/]+$", self.location):
+            raise Exception("Some build scripts don't like non a-zA-Z0-9-_ in "
                             "the path to the build directory; sorry :-(")
 
         self.clean_build_dir()
