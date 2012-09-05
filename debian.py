@@ -68,6 +68,8 @@ class Builder:
                 help="get the source debian files only", action="store_true")
         parser.add_option("-j", "--make-jobs", dest="make_jobs",
                 help="pass -j to make for speedy builds")
+        parser.add_option("-n", "--distro-name", dest="distro",
+                help="distro to build for")
 
         (options, args) = parser.parse_args()
         self.options = options.__dict__
@@ -79,6 +81,13 @@ class Builder:
 
         self.dl_fldigi_source = args[0]
         self.dl_fldigi_commit = args[1]
+
+    def default_distro(self):
+        distributor = self.cmd_output("lsb_release", "-si").strip()
+        if distributor == "Debian":
+            return "unstable"
+        else:
+            return self.cmd_output("lsb_release", "-sc").strip()
 
     def setup_build_dir(self):
         self.location = os.path.realpath(self.options["directory"])
@@ -190,11 +199,13 @@ class Builder:
         with open(changelog_file) as f:
             changelog = f.read()
 
-        line = self.cmd_output("lsb_release", "-c")
-        distro = line.split()[1]
+        distro = self.options["distro"]
+        if not distro:
+            distro = self.default_distro()
 
         changelog = changelog.format(version=self.version + "." + self.git,
-                distro=distro, commit=self.git, date=email.utils.formatdate())
+                                     distro=distro, commit=self.git,
+                                     date=email.utils.formatdate())
 
         with open(changelog_file, "w") as f:
             f.write(changelog)
