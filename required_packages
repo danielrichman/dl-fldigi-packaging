@@ -9,4 +9,4 @@ debian build:
   libxmlrpc-c3-dev cdbs quilt libssl-dev libpulse-dev devscripts
 
 windows build:
-  gcc-mingw32 nsis
+  gcc-mingw32 nsis unzip

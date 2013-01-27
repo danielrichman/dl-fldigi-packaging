@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright 2011 (C) Daniel Richman. License: GNU GPL 3
+# Copyright 2013 (C) Daniel Richman. License: GNU GPL 3
 
 import sys
 import optparse
@@ -243,6 +243,7 @@ class Builder:
         self.item("sndfile", "1.0.25")
         self.item("xmlrpc", "1.16.42")
         self.item("libtool", "2.4.2")
+        self.item("libusb", "1.2.6.0")
         self.item("hamlib", "1.2.14")
         self.item("openssl", "1.0.1c")
         self.item("curl", "7.27.0")
@@ -342,6 +343,18 @@ class Builder:
         os.mkdir(self.loc("temp", "src"))
         self.src_cmd("tar", "-xf", self.cloc(name),
                      "--strip-components=1")
+
+    def extract_source_zip(self, name):
+        os.mkdir(self.loc("temp", "extract"))
+        self.src_cmd("unzip", self.cloc(name), cwd=self.loc("temp", "extract"))
+
+        subdirs = os.listdir(self.loc("temp", "extract"))
+        if len(subdirs) != 1:
+            raise Exception("Downloaded file was a zipbomb")
+
+        os.rename(self.loc("temp", "extract", subdirs[0]),
+                  self.loc("temp", "src"))
+        os.rmdir(self.loc("temp", "extract"))
 
     def rm_f(self, name):
         try:
@@ -585,6 +598,30 @@ class Builder:
         self.make()
         self.make("install")
 
+    def libusb(self):
+        self.download_source("http://downloads.sourceforge.net/libusb-win32/"
+            "libusb-win32-src-1.2.6.0.zip", "libusb.zip",
+            "972438b7465a22882bc91a1238291240ee3cdb09f374454a027d003b150656d4"
+            "c262553104f74418bb49b4a7ca2f1a4f72d20e689fa3a7728881bafc876267f4")
+        self.extract_source_zip("libusb.zip")
+
+        with open(self.eloc("libusb.patch")) as p:
+            self.src_cmd("patch", "-p1", stdin=p)
+
+        self.make("host_prefix=i586-mingw32msvc", "dll")
+        os.unlink(self.loc("temp", "src", "libusb.a"))
+        self.src_cmd("i586-mingw32msvc-ar", "rcs", "libusb.a",
+                     *glob.glob(self.loc("temp", "src", "*.2.o")))
+        self.src_cmd("i586-mingw32msvc-ranlib", "libusb.a")
+
+        os.mkdir(self.loc("items", "libusb", "include"))
+        os.mkdir(self.loc("items", "libusb", "lib"))
+
+        shutil.copy(self.loc("temp", "src", "src", "lusb0_usb.h"),
+                    self.loc("items", "libusb", "include", "usb.h"))
+        shutil.copy(self.loc("temp", "src", "libusb.a"),
+                    self.loc("items", "libusb", "lib"))
+
     def hamlib(self):
         self.download_source("http://downloads.sourceforge.net/hamlib/"
             "hamlib-1.2.14.tar.gz", "hamlib.tar.gz",
@@ -597,7 +634,7 @@ class Builder:
                 "--without-winradio", "--without-gnuradio", "--without-usrp",
                 "--without-cxx-binding", "--without-perl-binding",
                 "--without-tcl-binding", "--without-python-binding",
-                flag_items=["pthreadsw32", "libtool"],
+                flag_items=["pthreadsw32", "libtool", "libusb"],
                 *STD_CONFIGURE)
 
         # Ugh...
@@ -680,8 +717,9 @@ class Builder:
                    "XMLRPC_C_CONFIG=" + self.loc("items", "xmlrpc", "bin",
                                                  "xmlrpc-c-config"),
                    "X_CFLAGS=-DXMD_H", # Inhibit libjpeg crud
-                   "LIBS=-lltdl",
-                   flag_items=["libjpeg", "zlib", "openssl", "libtool"],
+                   "LIBS=-lltdl -lusb",
+                   flag_items=["libjpeg", "zlib", "openssl", "libtool",
+                               "libusb"],
                    env=env,
                    *STD_CONFIGURE)
         self.make()

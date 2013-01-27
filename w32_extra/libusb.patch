@@ -1,0 +1,11 @@
+diff -ur libusb-win32-src-1.2.6.0.orig//src/install.c libusb-win32-src-1.2.6.0/src/install.c
+--- libusb-win32-src-1.2.6.0.orig//src/install.c	2011-10-28 14:34:08.000000000 +0100
++++ libusb-win32-src-1.2.6.0/src/install.c	2013-01-27 00:38:44.000000000 +0000
+@@ -48,6 +48,7 @@
+ #include "driver_api.h"
+ #include "libusb-win32_version.h"
+ 
++WINBASEAPI BOOL WINAPI CheckTokenMembership(HANDLE,PSID,PBOOL);
+ 
+ #define LIBUSB_DRIVER_PATH  "system32\\drivers\\libusb0.sys"
+ #define LIBUSB_OLD_SERVICE_NAME_NT "libusbd"
