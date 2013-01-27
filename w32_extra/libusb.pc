@@ -1,0 +1,14 @@
+prefix=
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+version = 1.2.6.0
+
+name = libusb
+pkgname = libusb0
+
+Name: ${name}
+Version: ${version}
+Description: libusb
+Cflags: -I${includedir}
+Libs: -L${libdir} -lusb

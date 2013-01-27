@@ -622,6 +622,14 @@ class Builder:
         shutil.copy(self.loc("temp", "src", "libusb.a"),
                     self.loc("items", "libusb", "lib"))
 
+        with open(self.eloc("libusb.pc")) as source:
+            with open(self.loc("pkgconfig", "libusb.pc"), "w") as dest:
+                for line in source:
+                    if line == "prefix=\n":
+                        line = "prefix={0}\n".format(
+                                self.loc("items", "libusb"))
+                    dest.write(line)
+
     def hamlib(self):
         self.download_source("http://downloads.sourceforge.net/hamlib/"
             "hamlib-1.2.14.tar.gz", "hamlib.tar.gz",
