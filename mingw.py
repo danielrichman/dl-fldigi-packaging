@@ -623,12 +623,16 @@ class Builder:
                     self.loc("items", "libusb", "lib"))
 
         with open(self.eloc("libusb.pc")) as source:
-            with open(self.loc("pkgconfig", "libusb.pc"), "w") as dest:
+            with open(self.loc("items", "libusb", "libusb.pc"), "w") as dest:
                 for line in source:
                     if line == "prefix=\n":
                         line = "prefix={0}\n".format(
                                 self.loc("items", "libusb"))
                     dest.write(line)
+
+        self.rm_f(self.loc("pkgconfig", "libusb.pc"))
+        os.symlink(self.loc("items", "libusb", "libusb.pc"),
+                   self.loc("pkgconfig", "libusb.pc"))
 
     def hamlib(self):
         self.download_source("http://downloads.sourceforge.net/hamlib/"
@@ -637,12 +641,16 @@ class Builder:
             "9c722c5cc1ea5d021dac9a069f7c4fe3a41c73969a6d39cdee88f809c1ea4354")
         self.extract_source_tar("hamlib.tar.gz")
 
+        env = os.environ.copy()
+        env["PKG_CONFIG_LIBDIR"] = self.loc("pkgconfig")
+
         self.configure("--prefix=" + self.loc("items", "hamlib"),
                 "--without-rigmatrix", "--without-rpc-backends",
                 "--without-winradio", "--without-gnuradio", "--without-usrp",
                 "--without-cxx-binding", "--without-perl-binding",
                 "--without-tcl-binding", "--without-python-binding",
                 flag_items=["pthreadsw32", "libtool", "libusb"],
+                env=env,
                 *STD_CONFIGURE)
 
         # Ugh...
@@ -725,9 +733,8 @@ class Builder:
                    "XMLRPC_C_CONFIG=" + self.loc("items", "xmlrpc", "bin",
                                                  "xmlrpc-c-config"),
                    "X_CFLAGS=-DXMD_H", # Inhibit libjpeg crud
-                   "LIBS=-lltdl -lusb",
-                   flag_items=["libjpeg", "zlib", "openssl", "libtool",
-                               "libusb"],
+                   "LIBS=-lltdl",
+                   flag_items=["libjpeg", "zlib", "openssl", "libtool"],
                    env=env,
                    *STD_CONFIGURE)
         self.make()
