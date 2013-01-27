@@ -661,6 +661,16 @@ class Builder:
         self.make("DEFS=-DHAVE_SLEEP -DHAVE_CONFIG_H")
         self.make("install")
 
+        fn = self.loc("items", "hamlib", "lib", "pkgconfig", "hamlib.pc")
+        with open(fn) as f:
+            lines = f.readlines()
+        with open(fn, "w") as f:
+            for line in lines:
+                if line.startswith("Libs: "):
+                    line = line.strip() + " -L{0} -lusb\n".format(
+                            self.loc("items", "libusb", "lib"))
+                f.write(line)
+
         self.copy_pkgconfig("hamlib", "hamlib.pc")
 
     def openssl(self):
